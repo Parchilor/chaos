@@ -1,1 +1,0 @@
-/usr/bin/cc  -fPIC   -shared -Wl,-soname,libcJSON_utils.so -o libcJSON_utils.so CMakeFiles/cJSON_utils.shared.dir/cJSON_Utils.c.o libcJSON.so -lm -Wl,-rpath,/home/goockr/codes/c/cJSON/build: 

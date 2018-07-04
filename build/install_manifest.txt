@@ -1,6 +1,0 @@
-/usr/local/lib/libcJSON.a
-/usr/local/lib/libcJSON.so
-/usr/local/include/cJSON/cJSON.h
-/usr/local/lib/libcJSON_utils.a
-/usr/local/lib/libcJSON_utils.so
-/usr/local/include/cJSON/cJSON_Utils.h
