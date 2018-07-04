@@ -1,3 +1,0 @@
-/home/goockr/codes/c/class/src/test_Cmake/build/CMakeFiles/edit_cache.dir
-/home/goockr/codes/c/class/src/test_Cmake/build/CMakeFiles/rebuild_cache.dir
-/home/goockr/codes/c/class/src/test_Cmake/build/CMakeFiles/class.dir
