@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC   -shared -Wl,-soname,libcJSON.so -o libcJSON.so CMakeFiles/cJSON.shared.dir/cJSON.c.o -lm 

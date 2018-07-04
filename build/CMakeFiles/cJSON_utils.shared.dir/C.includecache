@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/goockr/codes/c/cJSON/cJSON.h
+
+/home/goockr/codes/c/cJSON/cJSON_Utils.c
+ctype.h
+-
+string.h
+-
+stdlib.h
+-
+stdio.h
+-
+cJSON_Utils.h
+/home/goockr/codes/c/cJSON/cJSON_Utils.h
+
+/home/goockr/codes/c/cJSON/cJSON_Utils.h
+cJSON.h
+/home/goockr/codes/c/cJSON/cJSON.h
+

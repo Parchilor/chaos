@@ -1,45 +1,64 @@
-TARGETNAME	:= main
-TARGETTYPE	:= APP
+OBJ = cJSON.o
+LIBNAME = libcjson
+TESTS = test
 
-#CC	:=	mipsel-openwrt-linux-gcc
-#CXX	:=	mipsel-openwrt-linux-g++
-#LD	:=	$(CXX)
-#AR	:=	mipsel-openwrt-linux-ar
-#OBJCOPY	:=	mipsel-openwrt-linux-objcopy
+PREFIX ?= /usr/local
+INCLUDE_PATH ?= include/cjson
+LIBRARY_PATH ?= lib
 
-CFLAGS	= -Wall -O0 -g
-CXXFLAGS	=
-LDFLAGS	=
-ARFLAGS	=
-INCLUDE_DIRS	=	include
-LIBRARY_DIRS	=	../lib
-LIBTYPE	:= 
-LIBRARY_NAMES	=	
-BINARYDIR	:=	Debug
-SRCDIR	:=	src
+INSTALL_INCLUDE_PATH = $(DESTDIR)$(PREFIX)/$(INCLUDE_PATH)
+INSTALL_LIBRARY_PATH = $(DESTDIR)$(PREFIX)/$(LIBRARY_PATH)
 
-PRIMARY_OUTPUTS	:= $(BINARYDIR)/$(TARGETNAME)
-SOURCEFILES	:= main.c
-all_objs	= $(all_make_files:src/%.c=$(BINARYDIR)/%.o)
-all_make_files	:= $(addprefix $(SRCDIR)/, $(SOURCEFILES))
+INSTALL ?= cp -a
 
-CFLAGS	+= $(addprefix -,$(LIBTYPE))
-CFLAGS	+= $(addprefix -I,$(INCLUDE_DIRS))
-LIBRARY_LDFLAGS	= $(addprefix -l,$(LIBRARY_NAMES))
-LDFLAGS	+= $(addprefix -L,$(LIBRARY_DIRS))
+R_CFLAGS = -fpic $(CFLAGS) -Wall -Werror -Wstrict-prototypes -Wwrite-strings -D_POSIX_C_SOURCE=200112L
 
-all:mkdir do_all $(PRIMARY_OUTPUTS)
-mkdir:
-	@mkdir $(BINARYDIR) -p
-.PHONY:mkdir
-do_all:$(all_objs)
-$(all_objs):$(BINARYDIR)/%.o:$(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
-$(BINARYDIR)/$(TARGETNAME):$(all_objs)
-	$(CC) -o $@ $(LDFLAGS) $(all_objs) $(LIBRARY_LDFLAGS)
-.PHONY:do_all all
+uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo false')
 
-clean:
-	rm $(BINARYDIR) -rf
-.PHONY:clean
+## shared lib
+DYLIBNAME = $(LIBNAME).so 
+DYLIBCMD = $(CC) -shared -o $(DYLIBNAME)
 
+## create dynamic (shared) library on Darwin (base OS for MacOSX and IOS)
+ifeq (Darwin, $(uname_S))
+  DYLIBNAME = $(LIBNAME).dylib
+## create dyanmic (shared) library on SunOS
+else ifeq (SunOS, $(uname_S))
+  DYLIBCMD = $(CC) -G -o $(DYLIBNAME)
+  INSTALL = cp -r
+endif
+
+## static lib
+STLIBNAME = $(LIBNAME).a
+
+.PHONY: all clean install
+
+all: $(DYLIBNAME) $(STLIBNAME) $(TESTS)
+
+$(DYLIBNAME): $(OBJ)
+		$(DYLIBCMD) $< $(LDFLAGS)
+	
+$(STLIBNAME): $(OBJ)
+		ar rcs $@ $<
+
+$(OBJ): cJSON.c cJSON.h 
+
+.c.o:
+		$(CC) -ansi -pedantic -c $(R_CFLAGS) $<
+
+$(TESTS): cJSON.c cJSON.h test.c
+		$(CC)  cJSON.c test.c -o test -lm -I.
+
+install: $(DYLIBNAME) $(STLIBNAME)
+		mkdir -p $(INSTALL_LIBRARY_PATH) $(INSTALL_INCLUDE_PATH)
+		$(INSTALL) cJSON.h $(INSTALL_INCLUDE_PATH)
+		$(INSTALL) $(DYLIBNAME) $(INSTALL_LIBRARY_PATH)
+		$(INSTALL) $(STLIBNAME) $(INSTALL_LIBRARY_PATH)
+
+uninstall:
+		rm -rf $(INSTALL_LIBRARY_PATH)/$(DYLIBNAME)
+		rm -rf $(INSTALL_LIBRARY_PATH)/$(STLIBNAME)
+		rm -rf $(INSTALL_INCLUDE_PATH)/cJSON.h
+
+clean: 
+		rm -rf $(DYLIBNAME) $(STLIBNAME) $(TESTS) *.o
