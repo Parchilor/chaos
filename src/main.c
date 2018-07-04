@@ -1,19 +1,11 @@
-#include <string.h>
-#include <stdio.h>
+#include "c_inc.h"
 
-#include "fs.h"
-#include "sys.h"
-#include "encode.h"
-#include "decode.h"
-#include "struct.h"
-#include "cJSON.h"
-
-int main (int argc, char *argv[])
+int
+main (int argc, char *argv[])
 {
-	printf ("Module: Testing!\n");
-	readCMD();
-	cjson2struct();
-	option();
-	pMember();
+	printf("u8:\t%lu byte\n", sizeof(u8));
+	printf("u16:\t%lu byte\n", sizeof(u16));
+	printf("u32:\t%lu byte\n", sizeof(u32));
+	printf("u64:\t%lu byte\n", sizeof(u64));
 	return 0;
 }
