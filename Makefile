@@ -1,4 +1,4 @@
-TARGETNAME	:= main
+TARGETNAME	:= uname
 TARGETTYPE	:= APP
 
 #CC	:=	mipsel-openwrt-linux-gcc
@@ -7,13 +7,12 @@ TARGETTYPE	:= APP
 #AR	:=	mipsel-openwrt-linux-ar
 #OBJCOPY	:=	mipsel-openwrt-linux-objcopy
 
-CFLAGS	= -Wall -O0 -g
+CFLAGS	=
 CXXFLAGS	=
 LDFLAGS	=
 ARFLAGS	=
 INCLUDE_DIRS	=	include
 LIBRARY_DIRS	=	../lib
-LIBTYPE	:= 
 LIBRARY_NAMES	=	
 BINARYDIR	:=	Debug
 SRCDIR	:=	src
@@ -23,7 +22,6 @@ SOURCEFILES	:= main.c
 all_objs	= $(all_make_files:src/%.c=$(BINARYDIR)/%.o)
 all_make_files	:= $(addprefix $(SRCDIR)/, $(SOURCEFILES))
 
-CFLAGS	+= $(addprefix -,$(LIBTYPE))
 CFLAGS	+= $(addprefix -I,$(INCLUDE_DIRS))
 LIBRARY_LDFLAGS	= $(addprefix -l,$(LIBRARY_NAMES))
 LDFLAGS	+= $(addprefix -L,$(LIBRARY_DIRS))
