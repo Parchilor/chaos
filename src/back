@@ -1,0 +1,39 @@
+#include "c_inc.h"
+
+int
+main (int argc, char *argv[])
+{
+	u8 data[] = {0x7E, 0x0C, 0x03, 0x0E, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0A, 0x7F};
+	u16 datasiz = sizeof(data);
+	u16 datalen = sizeof(data)/sizeof(u8);
+
+	if (data[0] != 0x7e)	{
+		fputs("Fail!  --> [1]\n", stdout);
+		return EAGAIN;
+	}
+
+	u8 temp = 0;
+
+	for (u16 i = 1; i < data[1] + 1 + 1; i++)	{
+		temp ^= data[i];
+		printf("[%d] --> 0x%.2x\n", i, data[i]);
+	}
+
+	printf("Temp: 0x%.2x\n", temp);
+
+	if (temp != data[data[1]+2])	{
+		printf("Verify ID: %d, Verify: 0x%.2x\n", data[1]+2, data[data[1]+2]);
+		fputs("Fail! --> [2]\n", stdout);
+		return EAGAIN;
+	}
+
+	if(data[datalen - 1] != 0x7f)	{
+		printf("End ID: %d, End: 0x%.2x\n", datalen -1, data[datalen - 1]);
+		fputs("Fail! --> [3]\n", stdout);
+		return EAGAIN;
+	}
+
+	printf("Pass\n");
+	return 0;
+}
+
