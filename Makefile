@@ -1,13 +1,11 @@
 TARGETNAME	:= main
 TARGETTYPE	:= APP
 
-#CROSS_COMPLIER = mipsel-openwrt-linux-
-
-CC	:=	$(CROSS_COMPLIER)gcc
-CXX	:=	$(CROSS_COMPLIER)g++
-LD	:=	$(CXX)
-AR	:=	$(CROSS_COMPLIER)ar
-OBJCOPY	:=	$(CROSS_COMPLIER)objcopy
+#CC	:=	mipsel-openwrt-linux-gcc
+#CXX	:=	mipsel-openwrt-linux-g++
+#LD	:=	$(CXX)
+#AR	:=	mipsel-openwrt-linux-ar
+#OBJCOPY	:=	mipsel-openwrt-linux-objcopy
 
 CFLAGS	= -Wall -O0 -g
 CXXFLAGS	=
@@ -16,12 +14,12 @@ ARFLAGS	=
 INCLUDE_DIRS	=	include
 LIBRARY_DIRS	=	lib
 LIBTYPE	:= 
-LIBRARY_NAMES	=	
+LIBRARY_NAMES	=	mqtt4c
 BINARYDIR	:=	Debug
 SRCDIR	:=	src
 
 PRIMARY_OUTPUTS	:= $(BINARYDIR)/$(TARGETNAME)
-SOURCEFILES	:= main.c
+SOURCEFILES	:= main.c transport.c
 all_objs	= $(all_make_files:src/%.c=$(BINARYDIR)/%.o)
 all_make_files	:= $(addprefix $(SRCDIR)/, $(SOURCEFILES))
 
@@ -42,6 +40,6 @@ $(BINARYDIR)/$(TARGETNAME):$(all_objs)
 .PHONY:do_all all
 
 clean:
-	$(RM) -r $(BINARYDIR)
+	rm $(BINARYDIR) -rf
 .PHONY:clean
 
