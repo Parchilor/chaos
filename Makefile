@@ -1,4 +1,4 @@
-TARGETNAME	:= main
+TARGETNAME	:= udp_client
 TARGETTYPE	:= APP
 
 #CC	:=	mipsel-openwrt-linux-gcc
@@ -11,14 +11,14 @@ CFLAGS	=
 CXXFLAGS	=
 LDFLAGS	=
 ARFLAGS	=
-INCLUDE_DIRS	=	./include
-LIBRARY_DIRS	=	./lib
-LIBRARY_NAMES	=	pthread
+INCLUDE_DIRS	=	include
+LIBRARY_DIRS	=	../lib
+LIBRARY_NAMES	=	
 BINARYDIR	:=	Debug
 SRCDIR	:=	src
 
 PRIMARY_OUTPUTS	:= $(BINARYDIR)/$(TARGETNAME)
-SOURCEFILES	:= main.c
+SOURCEFILES	:= udpc.c
 all_objs	= $(all_make_files:src/%.c=$(BINARYDIR)/%.o)
 all_make_files	:= $(addprefix $(SRCDIR)/, $(SOURCEFILES))
 
