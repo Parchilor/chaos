@@ -1,46 +1,23 @@
-#include <stdio.h>
-#include <string.h>
-#include "sqlopt.h"
+#include "c_inc.h"
 
-// Data struct
-struct mydata {
-	char type[64];
-	char company[256];
-	char version[128];
-	float price;
-};
-
-// SQL callback
-int
-callback(void *data, int argc, char **argv, char **azColName)  
+int 
+main (int argc, char *argv[])
 {
-	int i;
-   	fprintf(stderr, "%s: ", (const char *)data);
-	for(i = 0; i < argc; i++)
-	{
-		printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+	time_t t;
+	struct tm *tmp;
+	char buf1[16], buf2[64];
+	time (&t);
+	tmp = localtime (&t);
+	if (strftime (buf1, 16, "%X, %a %b %d, %Y", tmp) == 0)	{
+		printf ("Buffer length 16 is too small\n");
+	}	else	{
+		printf ("%s\n", buf1);
 	}
-	printf("\n");
+
+	if (strftime (buf2, 64, "%X, %a %b %d, %Y", tmp) == 0)	{
+		printf ("Buffer length 64 is too small\n");
+	}	else	{
+		printf("%s\n", buf2);
+	}
 	return 0;
 }
-sqlopt opt = {
-	SQL_FILE_INIT("test.db"),
-	SQL_EXEC_INIT(callback, NULL),
-};
-
-/*
-sqlopt opt = {
-	.filename = "test.db",
-};
-*/
-
-int main()  
-{
-	SQL_Open(opt);
-	SQL_EXEC_COMMAND(opt, "create table test(Type text, Company text, Version text, Price real);");
-	SQL_Exec(opt);
-	SQL_EXEC_COMMAND(opt, "insert into test values('DSLR', 'Nikon', 'D5500', 3699);");
-	SQL_Exec(opt);
-	SQL_Close(opt);
-	return 0;  
-}  
