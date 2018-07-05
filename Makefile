@@ -12,10 +12,9 @@ CXXFLAGS	=
 LDFLAGS	=
 ARFLAGS	=
 INCLUDE_DIRS	=	include
-# /usr/include /usr/include/x86_64-linux-gnu
-LIBRARY_DIRS	=	/usr/lib lib
+LIBRARY_DIRS	=	../lib
 LIBTYPE	:= 
-LIBRARY_NAMES	=	crypto	
+LIBRARY_NAMES	=	
 BINARYDIR	:=	Debug
 SRCDIR	:=	src
 
