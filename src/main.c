@@ -1,145 +1,150 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <time.h>
-//#include <>
+#include <stdlib.h>
+#include <openssl/md5.h>
 
-#include "cJSON.h"
-#include "list.h"
+#define PW_PATH "files/syspw"
+#define PWMAXLEN 1024
+struct md5{
+	unsigned char pw[PWMAXLEN];
+	int pwlen;
+	char md5[35];
+};
 
-typedef struct {
-	char	*token;
-	char	*admin;
-	char	*password;
-	int		year;
-	int		mon;
-	int		mday;
-	int		hour;
-	int		min;
-	int		sec;
-	struct list_head *list;
-}TOKEN;
-
-typedef struct {
-	FILE *tk_fp;
-	TOKEN token;
-}LOG_CTRL;
-void get_localtime(TOKEN *r)
+void md5_init(struct md5 *md5)
 {
-	static char timestr[33];	
-	memset(timestr, 0, sizeof(timestr));	
-	time_t t;
-	struct tm *nowtime;
-	time(&t);
-	nowtime = localtime(&t);
-	r->year = nowtime->tm_year +1900;
-	r->mon = nowtime->tm_mon +1;
-	r->mday = nowtime->tm_mday;
-	r->hour = nowtime->tm_hour;
-	r->min = nowtime->tm_min;
-	r->sec = nowtime->tm_sec;
-	printf("%d/%d/%d %d:%d:%d\n", 
-			nowtime->tm_year + 1900, 
-			nowtime->tm_mon + 1, 
-			nowtime->tm_mday, 
-			nowtime->tm_hour, 
-			nowtime->tm_min, 
-			nowtime->tm_sec);
+	memset(md5, 0, sizeof(struct md5));
 }
 
-void list_list_init(TOKEN *r)
+void convert_hex(unsigned char *in, char *out)
 {
-	memset(r, 0, sizeof(TOKEN) *1);
-	r->list = malloc(sizeof(TOKEN) *1);
-	INIT_LIST_HEAD(r->list);
-}
-
-void list_token_init(TOKEN *r, int len)
-{
-	r->token = malloc(sizeof(char) * len);
-}
-
-void list_admin_init(TOKEN *r, int len)
-{
-	r->admin = malloc(sizeof(char) * len);
-}
-
-void list_password_init(TOKEN *r, int len)
-{
-	r->password = malloc(sizeof(char) * len);
-}
-
-void list_node_init(TOKEN *r, int tklen, int alen, int pwlen)
-{
-	list_token_init(r, tklen);
-	list_admin_init(r, alen);
-	list_password_init(r, pwlen);
-	get_localtime(r);
-}
-
-char *readline(FILE *file, int line, int *size)
-{
-	char c;
-	int CR_cnt = 0;
-	int cur_line_start = 0, cur_line_end = 0, slen;
-	// To get a length for return string
-	fseek(file, 0, SEEK_SET);
-	for(CR_cnt = 0; CR_cnt < line;)
+	int i;
+	for(i = 0; i < 16; i++)
 	{
-		c = fgetc(file);
-		if(c == '\n' || feof(file))
+		sprintf(out + (i*2), "%02x", in[i]);  // Convert to 32 bit(lowercase) 
+	}
+	out[32] = 0;
+}
+
+int MD5_encrypt(struct md5 *md5)
+{
+	char *password = malloc(sizeof(char) * md5->pwlen);
+	MD5_CTX ctx;
+	char *out = NULL;
+
+	unsigned char md5_tmp[16];
+	strcpy(password,md5->pw);
+	MD5_Init(&ctx);
+	MD5_Update(&ctx, password, md5->pwlen);
+	MD5_Final(md5_tmp, &ctx);
+	out = (char *)malloc(35);
+	memset(out, 0x00, 35);
+	convert_hex(md5_tmp, out);
+	strcpy(md5->md5,out);
+	free(out);
+	out = NULL;
+	return  0;
+}
+
+int save_pw(char *pw, int pw_len)
+{
+	char *wbuf = malloc(sizeof(char) * pw_len);
+	MD5_encrypt(pw, wbuf, pw_len);
+	FILE *fp = fopen(PW_PATH, "w");
+	if(fp == NULL)
+		return -1;
+	fwrite(wbuf, strlen(wbuf), 1, fp);
+	fclose(fp);
+	return 0;
+
+}
+
+int read_md5_pw(char *rbuf, int rlen)
+{
+	FILE *fp = fopen(PW_PATH, "r");
+	if(fp == NULL)
+		return -1;
+	fread(rbuf, rlen, 1, fp);
+	fclose(fp);
+	return 0;
+}
+
+int comfirm_pw(char *pw_in, int pw_len)
+{
+	char *rbuf = malloc(sizeof(char) * 32);
+	char *ebuf = malloc(sizeof(char) * pw_len);
+	MD5_encrypt(pw_in, ebuf, pw_len);
+	read_md5_pw(rbuf, 32);
+	if(!memcmp(rbuf, ebuf, 32))
+	{
+		printf("Pass!\n");
+		return 0;
+	}
+	printf("invalid!\n");
+	return -2;
+}
+
+int check_pw(void)
+{
+	char *rbuf = malloc(sizeof(char) * 32);
+	read_md5_pw(rbuf, 32);
+	if(!strncmp(rbuf, "", 32))
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int
+main (int argc, char *argv[])
+{
+	if(argv[1] == NULL)
+	{
+		printf("Please Enter Password!\n");
+		return 2; 
+	}
+
+	char *password = malloc(sizeof(char) * 1024);
+	if(check_pw())
+	{
+		printf("No password!\n");
+		printf("Enter New Password: ");
+		fflush(stdout);
+		fgets(password, 1024, stdin);
+		password[strlen(password) -1] = 0;
+		printf("PW: %s, PW LEN: %ld\n", password, strlen(password));
+		if(!save_pw(password, strlen(password)))
 		{
-			cur_line_start = cur_line_end;
-			cur_line_end = ftell(file);
-			CR_cnt++;
+			printf("New Password Save Down!\n");
+			return 0;
+		}
+		else
+		{
+			printf("Password Save Fail!\n");
+			return -1;
 		}
 	}
 
-	slen = cur_line_end - cur_line_start;
-	// Return length
-	if(size != NULL)
+	if(!comfirm_pw(argv[1], strlen(argv[1])))
 	{
-		*size = slen;
+		fgets(password, 1024, stdin);
+		password[strlen(password) -1] = 0;
+		printf("PW: %s, PW LEN: %ld\n", password, strlen(password));
+		if(!save_pw(password, strlen(password)))
+		{
+			printf("New Password Save Down!\n");
+			return 0;
+		}
+		else
+		{
+			printf("Password Save Fail!\n");
+			return -1;
+		}
 	}
-
-	// Start to get data
-	char *ret = malloc(sizeof(char) * (slen));
-	fseek(file, cur_line_start, SEEK_SET);
-	fgets(ret, slen, file);
-	if(cur_line_start == cur_line_end)
-	{
-		free(ret);
-		ret = NULL;
-	}
-	return ret;
-}
-
-void get_one_token(TOKEN *r)
-{
-
-	r->token = readline(r->tk_fp, 1, NULL);
-
-}
-
-int main(int argc, char *argv[])
-{
-	LOG_CTRL *tklist = malloc(sizeof(LOG_CTRL) *1);
-	tklist->token.list = malloc(sizeof(struct list_head) *1);
-	INIT_LIST_HEAD(tklist->token.list);
-//	get_one_token(tklist);
-	char *tmp;
-	FILE *fp = fopen("files/token", "r");
-	if(fp == NULL)
-	{
-		printf("Opened files fail!\n");
-		exit(-1);
-	}
-	
-	int line = atoi(argv[1]);
-	int size = 0;
-	tmp= readline(fp, line, &size);
-	get_localtime(&tklist->token);
-	printf("%s\t\n%d\n", tmp, size);
 	return 0;
 }
+
+

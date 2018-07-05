@@ -12,9 +12,10 @@ CXXFLAGS	=
 LDFLAGS	=
 ARFLAGS	=
 INCLUDE_DIRS	=	include
-LIBRARY_DIRS	=	lib
-LIBTYPE	:=
-LIBRARY_NAMES	=	cJSON
+# /usr/include /usr/include/x86_64-linux-gnu
+LIBRARY_DIRS	=	/usr/lib lib
+LIBTYPE	:= 
+LIBRARY_NAMES	=	crypto	
 BINARYDIR	:=	Debug
 SRCDIR	:=	src
 
