@@ -7,6 +7,8 @@ TARGETTYPE	:= APP
 #AR	:=	mipsel-openwrt-linux-ar
 #OBJCOPY	:=	mipsel-openwrt-linux-objcopy
 
+#CROSS_COMPILER = mipsel-openwrt-linux-
+CC = gcc
 CFLAGS	= -Wall -O0 -g
 CXXFLAGS	=
 LDFLAGS	=
@@ -34,9 +36,9 @@ mkdir:
 .PHONY:mkdir
 do_all:$(all_objs)
 $(all_objs):$(BINARYDIR)/%.o:$(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+	$(CROSS_COMPILER)$(CC) $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 $(BINARYDIR)/$(TARGETNAME):$(all_objs)
-	$(CC) -o $@ $(LDFLAGS) $(all_objs) $(LIBRARY_LDFLAGS)
+	$(CROSS_COMPILER)$(CC) -o $@ $(LDFLAGS) $(all_objs) $(LIBRARY_LDFLAGS)
 .PHONY:do_all all
 
 clean:
