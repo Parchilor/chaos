@@ -1,34 +1,47 @@
 #include <stdio.h>
 
-typedef struct {
-	unsigned char a:5;
-	unsigned char b:3;
-	unsigned char c:1;
-	unsigned char d:7;
-	unsigned char e:2;
-} _BIT;
-
-#define STR(n) (#n)
+char in[128] = "init i2c pn adc\n";
 
 int main(int argc, char *argv[])
 {
-//	_BIT arg = {0xff, 0xff, 0xff, 0xff, 0xff};
-	_BIT arg = {0x00, 0x00, 0x00, 0x00, 0x00};
+	char *p_in = in;
+	int cnt = 0;
+	const char* params[16];
+	while(*p_in)
+	{
+	//	printf("%d ----> %s\n", cnt, *p_in);
+		switch(*p_in)
+		{
+			case '\r':
+			case '\n':
+			case '\t':
+			case ' ':
+				p_in++;
+				continue;
+		}
+		if(0 == *p_in)
+			break;
+		params[cnt] = p_in;
+		cnt++;
+		while(*p_in)
+		{
+			if ('\r' == *p_in ||'\n' == *p_in ||' '  == *p_in || '\t' == *p_in)
+			{
+				*p_in = '\0';
+				p_in++;
+				break;
+			}
+			p_in ++;
+		}
+	}
 
-	printf("The struct size: _%s ---> %ld\n\n", STR(_BIT), sizeof(_BIT));
-
-	printf("Store: %s ---> %d[0x%x]\n", STR(a), arg.a, arg.a);
-	printf("Store: %s ---> %d[0x%x]\n", STR(b), arg.b, arg.b);
-	printf("Store: %s ---> %d[0x%x]\n", STR(c), arg.c, arg.c);
-	printf("Store: %s ---> %d[0x%x]\n", STR(d), arg.d, arg.d);
-	printf("Store: %s ---> %d[0x%x]\n", STR(e), arg.e, arg.e);
-
-	arg.c = 0xff;
-
-	printf("Store: %s ---> %d[0x%x]\n", STR(a), arg.a, arg.a);
-	printf("Store: %s ---> %d[0x%x]\n", STR(b), arg.b, arg.b);
-	printf("Store: %s ---> %d[0x%x]\n", STR(c), arg.c, arg.c);
-	printf("Store: %s ---> %d[0x%x]\n", STR(d), arg.d, arg.d);
-	printf("Store: %s ---> %d[0x%x]\n", STR(e), arg.e, arg.e);
+	int i;
+	printf("count = %d\n", cnt);
+	for(i = 0; i < cnt; i++)
+	{
+		printf("params[%d] = %s ", i, params[i]);
+	}
+	putchar('\n');
+	putchar('\n');
 	return 0;
 }
