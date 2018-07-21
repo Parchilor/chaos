@@ -1,9 +1,11 @@
 #include <stdio.h>
 
-#define _BIT 32
+#define _BIT 16
 
 unsigned long int data_width(unsigned long int bit)
 {
+	if(bit == 0)
+		return 0;
 	unsigned long int i, sum = 1;
 	for(i = 0; i < bit; i++)
 	{
